@@ -2,6 +2,8 @@
 
 A Go Library for programmatically generating Fluentd and Fluent Bit Configuration.
 
+For example usage, see the [unit test file](generator_test.go).
+
 The library exports the following interface:
 
 ```
