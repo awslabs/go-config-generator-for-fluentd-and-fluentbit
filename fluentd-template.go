@@ -33,7 +33,7 @@ var fluentDConfigTemplate = `{{- range .IncludeConfigHeadOfFile -}}
     @type  grep
     <regexp>
         key {{ .Key }}
-        pattern {{ .Regex }}
+        pattern /{{.Regex}}/
     </regexp>
 </filter>
 {{ end -}}
@@ -42,7 +42,7 @@ var fluentDConfigTemplate = `{{- range .IncludeConfigHeadOfFile -}}
     @type  grep
     <exclude>
         key {{ .Key }}
-        pattern {{ .Regex }}
+        pattern /{{.Regex}}/
     </exclude>
 </filter>
 {{ end -}}

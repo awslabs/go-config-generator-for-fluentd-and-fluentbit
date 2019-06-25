@@ -86,7 +86,7 @@ var expectedFluentDConfig = `@include /etc/head_file.conf
     @type  grep
     <regexp>
         key log
-        pattern *failure*
+        pattern /*failure*/
     </regexp>
 </filter>
 
@@ -94,7 +94,7 @@ var expectedFluentDConfig = `@include /etc/head_file.conf
     @type  grep
     <exclude>
         key log
-        pattern *success*
+        pattern /*success*/
     </exclude>
 </filter>
 
