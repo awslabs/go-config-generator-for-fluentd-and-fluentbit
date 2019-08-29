@@ -24,6 +24,7 @@ var expectedFluentBitConfig = `@INCLUDE /etc/head_file.conf
 
 [INPUT]
     Name forward
+    Tag tag
     Listen 127.0.0.1
     Port 24224
 
@@ -71,6 +72,7 @@ var expectedFluentDConfig = `@include /etc/head_file.conf
 
 <source>
     @type forward
+    tag tag
     Listen 127.0.0.1
     Port 24224
 </source>
@@ -126,7 +128,7 @@ var expectedFluentDConfig = `@include /etc/head_file.conf
 
 func TestGenerateConfig(t *testing.T) {
 	config := New()
-	config.AddInput("forward", "", map[string]string{
+	config.AddInput("forward", "tag", map[string]string{
 		"Listen": "127.0.0.1",
 		"Port":   "24224",
 	}).AddInput("forward", "", map[string]string{
