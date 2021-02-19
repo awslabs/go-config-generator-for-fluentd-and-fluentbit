@@ -18,6 +18,17 @@ import (
 	"text/template"
 )
 
+// Version versions the Fluent Bit and Fluentd schema syntax
+// Right now we only support Fluentd v1.0/v0.14 syntax, and Fluent Bit v1.0
+type Version string
+
+const (
+	// FluentdV1 is the v1.0/v0.14 branch of Fluentd
+	FluentdV1 Version = "v1.0"
+	// FLuentBitV1 is the first major version release of Fluent Bit
+	FLuentBitV1 Version = "1.0.0"
+)
+
 // IncludePosition is a type to represent the position of an @INCLUDE directive
 // to include external config
 type IncludePosition int
@@ -45,8 +56,8 @@ type FluentConfig interface {
 	AddFieldToRecord(key string, value string, tag string) FluentConfig
 	AddExternalConfig(filePath string, position IncludePosition) FluentConfig
 	AddOutput(name string, tag string, options map[string]string) FluentConfig
-	WriteFluentdConfig(wr io.Writer) error
-	WriteFluentBitConfig(wr io.Writer) error
+	WriteFluentdConfig(wr io.Writer, v Version) error
+	WriteFluentBitConfig(wr io.Writer, v Version) error
 }
 
 // New Creates a new Fluent Config generater
@@ -160,7 +171,7 @@ func (config *FluentConfigGenerator) AddOutput(name string, tag string, options 
 }
 
 // WriteFluentdConfig outputs the config in Fluentd syntax
-func (config *FluentConfigGenerator) WriteFluentdConfig(wr io.Writer) error {
+func (config *FluentConfigGenerator) WriteFluentdConfig(wr io.Writer, v Version) error {
 	tmpl, err := template.New("fluent.conf").Parse(fluentDConfigTemplate)
 	if err != nil {
 		return err
@@ -169,7 +180,7 @@ func (config *FluentConfigGenerator) WriteFluentdConfig(wr io.Writer) error {
 }
 
 // WriteFluentBitConfig outputs the config in Fluent Bit syntax
-func (config *FluentConfigGenerator) WriteFluentBitConfig(wr io.Writer) error {
+func (config *FluentConfigGenerator) WriteFluentBitConfig(wr io.Writer, v Version) error {
 	tmpl, err := template.New("fluent-bit.conf").Parse(fluentBitConfigTemplate)
 	if err != nil {
 		return err
