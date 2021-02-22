@@ -159,3 +159,88 @@ func TestGenerateConfig(t *testing.T) {
 	config.WriteFluentdConfig(fluentDConfig)
 	assert.Equal(t, expectedFluentDConfig, fluentDConfig.String(), "Expected FluentD Config to match")
 }
+
+func TestGenerateCustomTemplate(t *testing.T) {
+	var customConfig = `
+    <filter {{.Custom.myFilter.Tag}}>
+        @type {{.Custom.myFilter.Name}}
+
+        matchRegex /{{.Custom.myFilter.Regex}}/
+        replacement '{{.Custom.myFilter.Replacement}}'
+    </filter>
+
+    <output {{.Custom.myOutput.Tag}}>
+        @type {{.Custom.myOutput.Name}}
+        {{ range $dest := .Custom.myOutput.Destinations }}
+        <destination>
+            host {{$dest.Host}}
+            port {{$dest.Port}}
+        </destination>
+        {{- end }}
+    </output>
+    `
+	var filterData = struct {
+		Name        string
+		Tag         string
+		Regex       string
+		Replacement string
+	}{
+		Name:        `myFilter`,
+		Tag:         `foo`,
+		Regex:       `foo`,
+		Replacement: `bar`,
+	}
+	var outputData = struct {
+		Name         string
+		Tag          string
+		Destinations []struct {
+			Host, Port string
+		}
+	}{
+		`myOutput`, `*`, []struct {
+			Host string
+			Port string
+		}{
+			{`0.0.0.0`, `9001`},
+			{`127.0.0.1`, `9002`},
+		},
+	}
+	var customData = map[string]interface{}{
+		`myFilter`: filterData,
+		`myOutput`: outputData,
+	}
+	var expectedConfig = `
+    <filter foo>
+        @type myFilter
+
+        matchRegex /foo/
+        replacement 'bar'
+    </filter>
+
+    <output *>
+        @type myOutput
+        
+        <destination>
+            host 0.0.0.0
+            port 9001
+        </destination>
+        <destination>
+            host 127.0.0.1
+            port 9002
+        </destination>
+    </output>
+    `
+
+	config := New()
+	config.AddCustom(customData)
+	config.WithFluentdTemplate(customConfig)
+	config.WithFluentBitTemplate(customConfig)
+
+	fluentbitConfig := new(bytes.Buffer)
+	config.WriteFluentBitConfig(fluentbitConfig)
+	assert.Equal(t, expectedConfig, fluentbitConfig.String(), "Expected Fluent Bit Config to match")
+
+	fluentDConfig := new(bytes.Buffer)
+	config.WriteFluentdConfig(fluentDConfig)
+	assert.Equal(t, expectedConfig, fluentDConfig.String(), "Expected FluentD Config to match")
+}
